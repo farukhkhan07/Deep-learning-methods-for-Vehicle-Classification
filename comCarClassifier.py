@@ -13,7 +13,7 @@ import tensorflow as tf
 import cv2
 from tqdm import tqdm
 # data = "D:/compCarsThesisData/data/"
-image = "D:/compCarsThesisData/data/image/1/1101"
+image = "D:/compCarsThesisData/data/image/"
 # label = "D:/compCarsThesisData/data/label"
 # attributes = "D:/compCarsThesisData/data/misc/attributes.txt"
 # car_type = "D:/compCarsThesisData/data/misc/car_type.mat"
