@@ -14,35 +14,62 @@ MODEL_NAME = 'Vehicle Classification'
 LR = 1e-3
 train_count = 0
 test_count = 0
+
+# Path For Training Split From Research
 train = open("D:/compCarsThesisData/data/train_test_split/classification/train.txt","r")
 
+# Path For the Image Data
 path = "D:/compCarsThesisData/data/image/"
+
 training_images = []
 training_labels = []
+
 for x in train:
+# ===================================================
+# Concating the path with train.txt path line by line and reading the images for training
+# ===================================================
   abspath = str(path+x).rstrip("\n\r")
-  # print(abspath)
+
+# ===================================================
+# Matplotlib.image reading images from path function 
+# =================================================== 
   train_image_reader = mpg.imread(abspath)
-  # img = train_image_reader/255
+
+# ================================= 
+# Resizing Of Image By Using Opencv
+# =================================
   train_image = cv2.cv2.resize(train_image_reader,(IMG_SIZE,IMG_SIZE))
  
-  # print(image_reader.shape)
+# =================================
+# Getting Ready with Training Data
+# =================================
   training_images.append(np.asarray(train_image))
 
+# ================================================
+# Array for 163 make_names for Labeling of Images
+# ================================================
   arr = np.zeros(163)
-  # print(abspath.rsplit('/')[4])
+
+# ====================================  
+# Creating the hot encoded labels 
+# ====================================
   arr[int(abspath.rsplit('/')[4])-1] = 1
-  # print("Array Label",arr)
+
+# ====================================
+# Getting Ready With Training Labels
+# ====================================
   training_labels.append(np.asarray(arr))
   train_count=train_count + 1
   print(train_count)
 
 print("TRAINING AND LABELS IMAGES DONE")
 
-  # print("0th Index Appended Label", training_labels[0])
+
 
 test = open("D:/compCarsThesisData/data/train_test_split/classification/test.txt","r")
+
 print("TEST DATA LOADING....")
+
 testing_images = []
 testing_labels = []
 for y in test:
@@ -91,6 +118,6 @@ with tf.device('/gpu:0'):
   convnet = fully_connected(convnet, 163, activation='softmax')
   convnet = regression(convnet, optimizer='adam', learning_rate=LR, loss='categorical_crossentropy', name='targets')
   model = tflearn.DNN(convnet, tensorboard_dir='log', tensorboard_verbose=0)
-  model.fit({'input': X_train}, {'targets': y_train}, n_epoch=20,
+  model.fit({'input': X_train}, {'targets': y_train}, n_epoch=30,
             validation_set=({'input': X_test}, {'targets': y_test}),
             snapshot_step=500, show_metric=True, run_id=MODEL_NAME)
