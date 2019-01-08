@@ -208,30 +208,5 @@ model_out1 = model.predict_label(X_test[0])
 print("Model_OUT LABEL", model_out1)
 
 
-# imageprediction = X_test[0].reshape(None,IMG_SIZE,IMG_SIZE,3)
-# modelprediction = model.predict(imageprediction)
-# print("Predicted",np.argmax(modelprediction))
-# plt.imshow(modelprediction)
-# plt.title('Predicted Image')
-# plt.show()
-# plt.imshow(imageprediction)
-# plt.title('Testing Image')
-# plt.show()
-# # Reading Make_names.mat file for dictionary
-
-# pathmakenames = "D:/compCarsThesisData/data/misc/make_model_name.mat"
-
-# make_names_read = cio.loadmat(pathmakenames)
-# make_names = make_names_read['make_names']
-# # c = b.reshape(163,)
-# make_all_names = []
-# count = 0
-# for i in range(make_names.size):
-#   make_all_names.append(make_names[i][0][0])
-#   #print(d)
-
-# # Dictionary
-# labels_dic = {v: k for v, k in enumerate(make_all_names)}
-# print(labels_dic)
 
 
