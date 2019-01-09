@@ -11,7 +11,8 @@ from tflearn.layers.estimator import regression
 import scipy.io as cio
 from sklearn.externals import joblib
 from tflearn import models
-
+# AUTHOR: FARRUKH AHMED KHAN
+# EMAIL : farukhcs15@gmail.com
 
 
 IMG_SIZE = 300
