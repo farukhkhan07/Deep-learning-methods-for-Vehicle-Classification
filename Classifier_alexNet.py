@@ -12,7 +12,8 @@ import scipy.io as cio
 from sklearn.externals import joblib
 from tflearn import models
 from tflearn.layers.normalization import local_response_normalization
-
+# AUTHOR: FARRUKH AHMED KHAN
+# EMAIL : farukhcs15@gmail.com
 
 IMG_SIZE = 64
 MODEL_NAME = 'Vehicle Classification'
