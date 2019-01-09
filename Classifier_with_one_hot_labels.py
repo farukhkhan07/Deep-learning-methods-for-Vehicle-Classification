@@ -10,6 +10,8 @@ from tflearn.layers.core import input_data, dropout, fully_connected
 from tflearn.layers.estimator import regression
 import scipy.io as cio
 from sklearn.externals import joblib
+from tflearn import models
+
 
 
 IMG_SIZE = 300
@@ -187,25 +189,36 @@ with tf.device('/gpu:0'):
   convnet = fully_connected(convnet, 163, activation='softmax')
   convnet = regression(convnet, optimizer='adam', loss='categorical_crossentropy', name='targets')
   model = tflearn.DNN(convnet, tensorboard_dir='log', tensorboard_verbose=0)
-  model.fit({'input': X_train}, {'targets': y_train}, n_epoch=30,
+  history = model.fit({'input': X_train}, {'targets': y_train}, n_epoch=40,
             validation_set=({'input': X_test}, {'targets': y_test}),
             snapshot_step=500, show_metric=True, run_id=MODEL_NAME)
+
+writer = tf.summary.FileWriter('./graphs',tf.get_default_graph())
 
 # =========================
 # For Saving The Model
 # =========================
-model.save('my_trained_model.tflearn')
+# model.save('my_trained_model.tflearn')
 # np.save('training_finalized_data.npy', model)
+
+
+predictingimage = "D:/compCarsThesisData/data/image/78/12/2012/722894351630dc.jpg" #67/1698/2010/6805eb92ac6c70.jpg"
+predictImageRead = mpg.imread(predictingimage)
+resizingImage = cv2.cv2.resize(predictImageRead,(IMG_SIZE,IMG_SIZE))
+reshapedFinalImage = np.expand_dims(resizingImage, axis=0)
+# imagetoarray = np.array(resizingImage)
+# reshapedFinalImage = imagetoarray.reshape(1,IMG_SIZE,IMG_SIZE,3)
+
 # =========================
 # For Prediction
 # =========================
-model_out = model.predict(X_test[0])
+model_out = model.predict_label(reshapedFinalImage)
+print(model_out.shape)
 print(model_out)
-plt.imshow(model_out)
+model_out_reshaped = model_out.reshape(IMG_SIZE,IMG_SIZE,3)
+plt.imshow(model_out_reshaped)
 plt.show()
-model_out1 = model.predict_label(X_test[0])
 
-print("Model_OUT LABEL", model_out1)
 
 
 
