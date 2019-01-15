@@ -191,10 +191,11 @@ with tf.device('/gpu:0'):
   network = conv_2d(network, 256, 3, activation='relu')
   network = max_pool_2d(network, 3, strides=2)
   network = local_response_normalization(network)
-  network = fully_connected(network, 4096, activation='tanh')
+  network = fully_connected(network, 4096, activation='relu')
   network = dropout(network, 0.5)
-  network = fully_connected(network, 4096, activation='tanh')
+  network = fully_connected(network, 4096, activation='relu')
   network = dropout(network, 0.5)
+  network = fully_connected(network, 4096, activation='relu')
   network = fully_connected(network, 163, activation='softmax')
   network = regression(network, optimizer='momentum',
                       loss='categorical_crossentropy',
@@ -204,3 +205,21 @@ with tf.device('/gpu:0'):
   history = model.fit({'input': X_train}, {'targets': y_train}, n_epoch=40,
             validation_set=({'input': X_test}, {'targets': y_test}),
             snapshot_step=500, show_metric=True, run_id=MODEL_NAME)
+
+
+predictingimage = "D:/compCarsThesisData/data/image/78/12/2012/722894351630dc.jpg" #67/1698/2010/6805eb92ac6c70.jpg"
+predictImageRead = mpg.imread(predictingimage)
+resizingImage = cv2.cv2.resize(predictImageRead,(IMG_SIZE,IMG_SIZE))
+reshapedFinalImage = np.expand_dims(resizingImage, axis=0)
+# imagetoarray = np.array(resizingImage)
+# reshapedFinalImage = imagetoarray.reshape(1,IMG_SIZE,IMG_SIZE,3)
+
+# =========================
+# For Prediction
+# =========================
+model_out = model.predict_label(reshapedFinalImage)
+print(model_out.shape)
+print(model_out)
+model_out_reshaped = model_out.reshape(IMG_SIZE,IMG_SIZE,3)
+plt.imshow(model_out_reshaped)
+plt.show()
