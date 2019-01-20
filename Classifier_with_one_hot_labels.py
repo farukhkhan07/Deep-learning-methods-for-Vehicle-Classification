@@ -15,7 +15,7 @@ from tflearn import models
 # EMAIL : farukhcs15@gmail.com
 
 
-IMG_SIZE = 200
+IMG_SIZE = 224
 MODEL_NAME = 'Vehicle Classification'
 # LR = 1e-3
 train_count = 0
@@ -95,7 +95,8 @@ for x in train:
 # ====================================
   training_labels.append(np.asarray(arr))
   train_count=train_count + 1
-  print(train_count)
+  print(train_count, arr.shape, arr[77], abspath)
+  # exit()
 
 print("TRAINING AND LABELS IMAGES DONE")
 
@@ -157,10 +158,10 @@ print("TEST AND LABELS ARE DONE NOW...")
   # print("0th Index Appended Label", testing_labels[0])
 
 # For Saving the data in npy format
-np.save('224_Training_data',training_images)
-np.save('224_Training_labels', training_labels)
-np.save('224_Testing_data', testing_images)
-np.save('224_Testing_labels',testing_labels)
+np.save('S_224_Training_data',training_images)
+np.save('S_224_Training_labels', training_labels)
+np.save('S_224_Testing_data', testing_images)
+np.save('S_224_Testing_labels',testing_labels)
 
 # =========================
 # Data already Saved, Load it
