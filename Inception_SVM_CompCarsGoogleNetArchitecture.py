@@ -87,6 +87,7 @@ print("Training Data Labels Shape",train_labels_hotEncode.shape)
 print("Testing Data Shape", y_train.shape)
 print("Testing Data Labels Shape", test_labels_hotEncode.shape)
 
+
 # X_train = np.array(X_train).astype(np.float32)
 # y_train = np.array(y_train).astype(np.float32)
 
@@ -232,7 +233,7 @@ model = Model(input_layer, [image,image1,image2], name='inception_v1')
 
 model.summary()
 
-epochs = 200
+epochs = 350
 initial_lrate = 0.01 # Changed From 0.01
 
 def decay(epoch, steps=100):
