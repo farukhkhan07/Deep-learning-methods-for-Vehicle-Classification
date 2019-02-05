@@ -179,10 +179,10 @@ MODEL_NAME = 'Vehicle Classification'
 # y_train = np.load('D:/ThesisWork/seriouswork/withmodel_namesas Labe;s/64_ALEXNET_2004_labels_Inception_224_Testing_data.npy')#('D:/ThesisWork/S_224_Testing_data.npy')#testing_images 
 # y_test = np.load('D:/ThesisWork/seriouswork/withmodel_namesas Labe;s/64_ALEXNET_2004_labels_Inception_224_Testing_labels.npy')
 
-X_train = np.load('D:/Inception_preprocessed_data_Labels_2004/Training_data_preprocessed_200x200.npy')#('D:/ThesisWork/S_224_Training_data.npy')#training_images
-X_test = np.load('D:/Inception_preprocessed_data_Labels_2004/Training_labels_KerasCompatibleFormat.npy')#('D:/ThesisWork/S_224_Training_labels.npy')#training_labels
-y_train = np.load('D:/Inception_preprocessed_data_Labels_2004/Testing_data_preprocessed_200x200.npy')#('D:/ThesisWork/S_224_Testing_data.npy')#testing_images 
-y_test = np.load('D:/Inception_preprocessed_data_Labels_2004/Testing_labels_preprocess_200x200.npy')
+X_train = np.load('D:/Inception_preprocessed_data_Labels_2004/Top5/TrainingData_Top5.npy')#('D:/ThesisWork/S_224_Training_data.npy')#training_images
+X_test = np.load('D:/Inception_preprocessed_data_Labels_2004/Top5/TrainingLabels_Top5.npy')#('D:/ThesisWork/S_224_Training_labels.npy')#training_labels
+y_train = np.load('D:/Inception_preprocessed_data_Labels_2004/Top5/TestingData_Top5.npy')#('D:/ThesisWork/S_224_Testing_data.npy')#testing_images 
+y_test = np.load('D:/Inception_preprocessed_data_Labels_2004/Top5/TestingLabels_Top5.npy')
 
 le = preprocessing.LabelEncoder()
 le.fit(X_test)
@@ -195,10 +195,14 @@ le2.fit(y_test)
 transform_testLabels = le2.transform(y_test)
 
 test_labels_hotEncode = np_utils.to_categorical(transform_testLabels,len(set(transform_testLabels)))
-
+from random import shuffle
+shuffle(X_train)
+shuffle(train_labels_hotEncode)
+shuffle(y_train)
+shuffle(test_labels_hotEncode)
 with tf.device('/gpu:0'):
   tf.reset_default_graph()
-  network = input_data(shape=[None, 200, 200, 3], name='input')
+  network = input_data(shape=[None, 224, 224, 3], name='input')
   network = conv_2d(network, 96, 11, strides=4, activation='relu')
   network = max_pool_2d(network, 3, strides=2)
   network = local_response_normalization(network)
@@ -215,30 +219,35 @@ with tf.device('/gpu:0'):
   network = fully_connected(network, 4096, activation='relu')
   network = dropout(network, 0.5)
   network = fully_connected(network, 4096, activation='relu')
-  network = fully_connected(network, 49, activation='softmax')
+  network = fully_connected(network, 5, activation='softmax')
   network = regression(network, optimizer='adam',
                       loss='categorical_crossentropy',
-                      learning_rate=0.01, name = 'targets', batch_size=32)
+                      learning_rate=0.001, name = 'targets', batch_size=32)
   model = tflearn.DNN(network, checkpoint_path='model_alexnet',
                     max_checkpoints=1, tensorboard_verbose=2)
-  history = model.fit({'input': X_train}, {'targets': train_labels_hotEncode}, n_epoch=40,
-            validation_set=({'input': y_train}, {'targets': test_labels_hotEncode}),
+  history = model.fit({'input': X_train}, {'targets': train_labels_hotEncode}, n_epoch=2,
+            validation_set=0.3,
             snapshot_step=500, show_metric=True, run_id=MODEL_NAME)
 
 
-predictingimage = "D:/compCarsThesisData/data/image/78/12/2012/722894351630dc.jpg" #67/1698/2010/6805eb92ac6c70.jpg"
-predictImageRead = mpg.imread(predictingimage)
-resizingImage = cv2.cv2.resize(predictImageRead,(IMG_SIZE,IMG_SIZE))
-reshapedFinalImage = np.expand_dims(resizingImage, axis=0)
+# predictingimage = "D:/compCarsThesisData/data/image/78/12/2012/722894351630dc.jpg" #67/1698/2010/6805eb92ac6c70.jpg"
+predictImageRead = X_train
+# resizingImage = cv2.cv2.resize(predictImageRead,(IMG_SIZE,IMG_SIZE))
+# reshapedFinalImage = np.expand_dims(predictImageRead, axis=0)
 # imagetoarray = np.array(resizingImage)
 # reshapedFinalImage = imagetoarray.reshape(1,IMG_SIZE,IMG_SIZE,3)
 
 # =========================
 # For Prediction
 # =========================
-model_out = model.predict_label(reshapedFinalImage)
+model_out = model.predict(predictImageRead)
 print(model_out.shape)
 print(model_out)
 n = np.argmax(model_out,axis=-1)
-plt.imshow(n)
-plt.show()
+# plt.imshow(n)
+# plt.show()
+
+from sklearn.metrics import confusion_matrix
+
+cm = confusion_matrix(train_labels_hotEncode,model_out)
+print(cm)

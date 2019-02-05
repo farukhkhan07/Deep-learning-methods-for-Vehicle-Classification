@@ -18,6 +18,10 @@ import matplotlib.image as mpg
 from keras.models import Sequential
 import matplotlib.pyplot as plt
 from sklearn import preprocessing
+import matplotlib.pyplot as plt
+from random import shuffle
+from sklearn.metrics import confusion_matrix
+
 # path_to_images = "D:/compCarsThesisData/data/images/"
 # train_path = "D:/compCarsThesisData/data/train_test_split/classification/train.text"
 # test_path = "D:/compCarsThesisData/data/train_test_split/classification/test.txt"
@@ -52,22 +56,31 @@ from sklearn import preprocessing
 # y_train = np.load('D:/ThesisWork/TestingImages_googleNet.npy')
 # y_test = np.load('D:/ThesisWork/TestingImagesLabels_googleNet.npy')
 
-X_train = np.load('D:/Inception_preprocessed_data_Labels_2004/Training_data_preprocessed_200x200.npy')#('D:/ThesisWork/S_224_Training_data.npy')#training_images
-X_test = np.load('D:/Inception_preprocessed_data_Labels_2004/Training_labels_KerasCompatibleFormat.npy')#('D:/ThesisWork/S_224_Training_labels.npy')#training_labels
-y_train = np.load('D:/Inception_preprocessed_data_Labels_2004/Testing_data_preprocessed_200x200.npy')#('D:/ThesisWork/S_224_Testing_data.npy')#testing_images 
-y_test = np.load('D:/Inception_preprocessed_data_Labels_2004/Testing_labels_preprocess_200x200.npy')#('D:/ThesisWork/S_224_Testing_labels.npy')#testing_labels
-
+X_train = np.load('D:/Inception_preprocessed_data_Labels_2004/Top5/TrainingData_Top5.npy')#('D:/ThesisWork/S_224_Training_data.npy')#training_images
+X_test = np.load('D:/Inception_preprocessed_data_Labels_2004/Top5/TrainingLabels_Top5.npy')#('D:/ThesisWork/S_224_Training_labels.npy')#training_labels
+y_train = np.load('D:/Inception_preprocessed_data_Labels_2004/Top5/TestingData_Top5.npy')#('D:/ThesisWork/S_224_Testing_data.npy')#testing_images 
+y_test = np.load('D:/Inception_preprocessed_data_Labels_2004/Top5/TestingLabels_Top5.npy')#('D:/ThesisWork/S_224_Testing_labels.npy')#testing_labels
+print(X_test)
 le = preprocessing.LabelEncoder()
 le.fit(X_test)
 transform_trainLabels = le.transform(X_test)
+print(transform_trainLabels)
+print(le.inverse_transform(transform_trainLabels))
 
 train_labels_hotEncode = np_utils.to_categorical(transform_trainLabels,len(set(transform_trainLabels)))
-
+shuffle(X_train)
+shuffle(train_labels_hotEncode)
 le2 = preprocessing.LabelEncoder()
 le2.fit(y_test)
 transform_testLabels = le2.transform(y_test)
 
+
 test_labels_hotEncode = np_utils.to_categorical(transform_testLabels,len(set(transform_testLabels)))
+print(test_labels_hotEncode.shape)
+shuffle(y_train)
+shuffle(test_labels_hotEncode)
+# print(train_labels_hotEncode[3000])
+# exit()
 # X_train = np.asarray(X_train / 255.0)
 # y_train = np.asarray(y_train / 255.0)
 
@@ -86,7 +99,6 @@ print("Trainig Data Shape",X_train.shape)
 print("Training Data Labels Shape",train_labels_hotEncode.shape)
 print("Testing Data Shape", y_train.shape)
 print("Testing Data Labels Shape", test_labels_hotEncode.shape)
-
 
 # X_train = np.array(X_train).astype(np.float32)
 # y_train = np.array(y_train).astype(np.float32)
@@ -154,12 +166,12 @@ image = inception_module(image,
                             filters_pool_proj=64,
                             name='inception_4a')
 
-image1 = AveragePooling2D((4,4), strides=3)(image)
+image1 = AveragePooling2D((5,5), strides=3)(image)
 image1 = Conv2D(128, (1,1), padding='same', activation='relu')(image1)
 image1 = Flatten()(image1)
 image1 = Dense(1024, activation='relu')(image1)
-image1 = Dropout(0.4)(image1)
-image1 = Dense(66, activation='softmax', name='auxilliary_output_1')(image1)
+image1 = Dropout(0.7)(image1)
+image1 = Dense(5, activation='softmax', name='auxilliary_output_1')(image1)
 
 image = inception_module(image,
                             filters_1x1 = 160,
@@ -188,12 +200,12 @@ image = inception_module(image,
                            filters_pool_proj=64,
                            name='inception_4d')
 
-image2 = AveragePooling2D((4,4), strides=3)(image)
+image2 = AveragePooling2D((5,5), strides=3)(image)
 image2 = Conv2D(128, (1,1), padding='same', activation='relu')(image2)
 image2 = Flatten()(image2)
 image2 = Dense(1024, activation='relu')(image2)
-image2 = Dropout(0.4)(image2) #Changed from 0.7
-image2 = Dense(66, activation='softmax', name='auxilliary_output_2')(image2)
+image2 = Dropout(0.7)(image2) #Changed from 0.7
+image2 = Dense(5, activation='softmax', name='auxilliary_output_2')(image2)
   
 image = inception_module(image,
                             filters_1x1=256,
@@ -226,15 +238,16 @@ image = inception_module(image,
 
 image = GlobalAveragePooling2D(name='avg_pool_5_3x3/1')(image)
 
-image = Dropout(0.4)(image)
-image = Dense(66, activation='softmax', name='output')(image)
+image = Dropout(0.7)(image)
+image = Dense(5, activation='softmax', name='output')(image)
 
 model = Model(input_layer, [image,image1,image2], name='inception_v1')
 
 model.summary()
 
-epochs = 350
-initial_lrate = 0.01 # Changed From 0.01
+
+epochs = 2
+initial_lrate = 0.001 # Changed From 0.01
 
 def decay(epoch, steps=100):
   initial_lrate = 0.01
@@ -253,9 +266,9 @@ model.compile(loss=['categorical_crossentropy', 'categorical_crossentropy','cate
 
 # loss = 'categorical_crossentropy', 'categorical_crossentropy','categorical_crossentropy'
 
-history = model.fit(X_train, [train_labels_hotEncode,train_labels_hotEncode,train_labels_hotEncode], validation_data=(y_train,[test_labels_hotEncode,test_labels_hotEncode,test_labels_hotEncode]),epochs=epochs, batch_size= 32, callbacks=[lr_sc]) # batch size changed from 256 or 64 to 16(y_train,[y_test,y_test,y_test])
+history = model.fit(X_train, [train_labels_hotEncode,train_labels_hotEncode,train_labels_hotEncode], validation_split=0.3,shuffle=True,epochs=epochs, batch_size= 32, callbacks=[lr_sc]) # batch size changed from 256 or 64 to 16(y_train,[y_test,y_test,y_test])
+# validation_data=(y_train,[test_labels_hotEncode,test_labels_hotEncode,test_labels_hotEncode]), validation_data= (X_train, [train_labels_hotEncode,train_labels_hotEncode,train_labels_hotEncode]),
 
-import matplotlib.pyplot as plt
 print(history.history.keys())
 plt.plot(history.history['output_acc'])
 plt.plot(history.history['val_output_acc'])
@@ -270,41 +283,23 @@ plt.show()
 
 
 
-predictingimage = "D:/compCarsThesisData/data/image/78/3/2010/0ba8d018cdc994.jpg" #67/1698/2010/6805eb92ac6c70.jpg"
-predictImageRead = mpg.imread(predictingimage)
+# predictingimage = "D:/compCarsThesisData/data/image/78/3/2010/0ba8d018cdc994.jpg" #67/1698/2010/6805eb92ac6c70.jpg"
+predictImageRead =  X_train
+# resizingImage = cv2.cv2.resize(predictImageRead,(224,224))
+# reshapedFinalImage = np.expand_dims(predictImageRead, axis=0)
 
-resizingImage = cv2.cv2.resize(predictImageRead,(224,224))
-reshapedFinalImage = np.expand_dims(resizingImage, axis=0)
-npimage = np.asarray(reshapedFinalImage)
-m = model.predict(npimage)
+# print(reshapedFinalImage.shape)
+# npimage = np.array(reshapedFinalImage)
+m = model.predict(predictImageRead)
 print(m)
-# from sklearn import svm
-# classifier = svm.SVC(kernel = 'linear', C=0.01)
-# y_pred = classifier.fit(X_train, X_test).predict(y_train)
-# print("Printing y_Prediction",y_pred)
-# from sklearn.metrics import confusion_matrix
-# cm = confusion_matrix(y_test, y_pred)
-# print("Printing Confusion Matrix",cm)
-
-
-# plt.clf()
-# plt.imshow(cm, interpolation='nearest')
-# plt.ylabel('True Label')
-# plt.xlabel('Predicted Label')
-# plt.show()
-
-# print(m)
-# print(y_test[m])
-n = np.argmax(m,axis=-1)
-plt.imshow(n)
+print(predictImageRead.shape)
+print(train_labels_hotEncode)
+# print(m.shape)
+plt.imshow(predictImageRead[1])
 plt.show()
-
-# from sklearn import svm
-# from sklearn.metrics import confusion_matrix
-# classifier = svm.SVC(kernel='linear', C=0.01)
-# y_pred = classifier.fit(X_train,X_test).predict(y_train)
-
-# cm = confusion_matrix(y_pred,y_test)
-# print(cm)
-# plt.imshow(cm)
-# plt.show()
+# n = np.argmax(m,axis=-1)
+# n = np.array(m)
+print(confusion_matrix(X_test,m))
+cm = confusion_matrix(X_test,m)
+plt.imshow(cm)
+plt.show()
