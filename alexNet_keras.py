@@ -15,17 +15,20 @@ np.random.seed(1000)
 # import tflearn.datasets.oxflower17 as oxflower17
 # x, y = oxflower17.load_data(one_hot=True)
 
-X_train = np.load('D:/Inception_preprocessed_data_Labels_2004/Morethan1000samplesData/Training_Data_1000Samples.npy')#('D:/ThesisWork/S_224_Training_data.npy')#training_images
-X_test = np.load('D:/Inception_preprocessed_data_Labels_2004/Morethan1000samplesData/Training_Labels_1000Samples.npy')#('D:/ThesisWork/S_224_Training_labels.npy')#training_labels
-plt.imshow(X_train[4000])
+X_train = np.load('D:/Inception_preprocessed_data_Labels_2004/Morethan2000samplesData/Training_Data_2000Samples_chunk0.npy')#('D:/ThesisWork/S_224_Training_data.npy')#training_images
+X_test = np.load('D:/Inception_preprocessed_data_Labels_2004/Morethan2000samplesData/Training_labels_2000Samples_chunk0.npy')#('D:/ThesisWork/S_224_Training_labels.npy')#training_labels
+print(X_test)
+exit()
+plt.imshow(X_train[1500])
 plt.show()
-X_train = X_train/255.0
+# X_train = X_train/255.0
 le = preprocessing.LabelEncoder()
 le.fit(X_test)
 transform_trainLabels = le.transform(X_test)
 
 train_labels_hotEncode = np_utils.to_categorical(transform_trainLabels,len(set(transform_trainLabels)))
-
+print(X_train.shape)
+print(train_labels_hotEncode.shape)
 shuffle(X_train)
 shuffle(train_labels_hotEncode)
 # (3) Create a sequential model

@@ -4,14 +4,16 @@ import matplotlib.image as mpg
 import cv2
 import gc
 import numpy as np
+from sklearn.preprocessing import normalize
+import gc
 # bbox = "D:/Morethan1000samples/data/labels/"
 # imagepath = "D:/Morethan1000samples/data/image/"
 
 # bbox = "D:/Morethan1000samples/data/labels/"
 # imagepath = "D:/Morethan1000samples/data/image/"
 
-bbox = "D:/Morethan2000samples/data/labels/"
-imagepath = "D:/Morethan2000samples/data/image/"
+bbox = "D:/Morethan4000samples/data/labels/"
+imagepath = "D:/Morethan4000samples/data/image/"
 
 training_data = []
 training_labels = []
@@ -43,35 +45,50 @@ for root, _, files in os.walk(bbox):
 							# print(x1,y1,x2,y2)	
 							try:
 								read_img = mpg.imread(cipimg)
+								read_img = read_img.astype('float32')
 								# print(read_img.shape)
 								read_img_bbox = read_img[y1:y2, x1:x2,:]
 								# print(read_img_bbox.shape)
 								resize_img = cv2.cv2.resize(read_img_bbox,(300,300))
-								resize_img_pre = resize_img / 255.0
-								# plt.imshow(resize_img)
+								resize_img_pre = cv2.cv2.normalize(resize_img, None, dtype=cv2.CV_32F)
+								# print(int(cipimg.split('\\')[4]))
+								# exit()
+								# resize_img_pre *= 255.0 / resize_img.max()
+								# plt.imshow(resize_img_pre)
 								# plt.show()
+								# exit()
 								# print(resize_img.shape)
 								# exit()
 								# training_data.append(resize_img)
 								# training_labels.append(int(cipimg.split('\\')[4]))
+
 								training_data.append(resize_img_pre)
+
 								training_labels.append(int(cipimg.split('\\')[4]))
+								gc.collect()
 								# for i in range(37529):
-								i = 0
-								if len(training_data) >= 10000 and len(training_labels) >= 10000:
-									np.save('D:/Inception_preprocessed_data_Labels_2004/Morethan2000samplesData/Training_Data_2000Samples_chunk'+ str(i),training_data)
-									np.save('D:/Inception_preprocessed_data_Labels_2004/Morethan2000samplesData/Training_labels_2000Samples_chunk' + str(i),training_labels)
-									training_data = []
-									training_labels = []
-									i = i + 1	
+								# 	if len(training_data) == 10000 and len(training_labels) == 10000:
+								# 		np.save('D:/Inception_preprocessed_data_Labels_2004/Morethan2000samplesData/Training_Data_2000Samples_chunk'+ str(i),training_data)
+								# 		np.save('D:/Inception_preprocessed_data_Labels_2004/Morethan2000samplesData/Training_labels_2000Samples_chunk' + str(i),training_labels)
+								# 		print(len(training_data))
+								# 		print(len(training_labels))
+								# 		training_data = []
+								# 		training_labels = []	
+								# 		exit()
+								
 							except Exception as e:
-								print(str(e), cip)	
+								print("Error",str(e), cip)
 							count = count + 1
 							print(count)	
+					txt.flush()
+					txt.close()	
 
 
 
+try:
+	np.save('D:/Inception_preprocessed_data_Labels_2004/Morethan2000samplesData/Training_Data_2000Samples',training_data)
+	np.save('D:/Inception_preprocessed_data_Labels_2004/Morethan2000samplesData/Training_Labels_2000Samples',training_labels)
+except MemoryError as m:
+	print("Cannot")
 
-# np.save('D:/Inception_preprocessed_data_Labels_2004/Morethan1000samplesData/Training_Data_1000Samples',training_data)
-# np.save('D:/Inception_preprocessed_data_Labels_2004/Morethan1000samplesData/Training_Labels_1000Samples',training_labels)
-
+print("DONE")
