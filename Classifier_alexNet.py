@@ -198,8 +198,9 @@ test_labels_hotEncode = np_utils.to_categorical(transform_testLabels,len(set(tra
 from random import shuffle
 shuffle(X_train)
 shuffle(train_labels_hotEncode)
-shuffle(y_train)
-shuffle(test_labels_hotEncode)
+# shuffle(y_train)
+
+# shuffle(test_labels_hotEncode)
 with tf.device('/gpu:0'):
   tf.reset_default_graph()
   network = input_data(shape=[None, 224, 224, 3], name='input')
@@ -220,13 +221,13 @@ with tf.device('/gpu:0'):
   network = dropout(network, 0.5)
   network = fully_connected(network, 4096, activation='relu')
   network = fully_connected(network, 5, activation='softmax')
-  network = regression(network, optimizer='adam',
+  network = regression(network, optimizer='sgd',
                       loss='categorical_crossentropy',
                       learning_rate=0.001, name = 'targets', batch_size=32)
   model = tflearn.DNN(network, checkpoint_path='model_alexnet',
                     max_checkpoints=1, tensorboard_verbose=2)
-  history = model.fit({'input': X_train}, {'targets': train_labels_hotEncode}, n_epoch=2,
-            validation_set=0.3,
+  history = model.fit({'input': X_train}, {'targets': train_labels_hotEncode}, n_epoch=50,
+            validation_set=0.3,shuffle=True,
             snapshot_step=500, show_metric=True, run_id=MODEL_NAME)
 
 
@@ -243,7 +244,7 @@ predictImageRead = X_train
 model_out = model.predict(predictImageRead)
 print(model_out.shape)
 print(model_out)
-n = np.argmax(model_out,axis=-1)
+# n = np.argmax(model_out,axis=-1)
 # plt.imshow(n)
 # plt.show()
 
@@ -251,3 +252,5 @@ from sklearn.metrics import confusion_matrix
 
 cm = confusion_matrix(train_labels_hotEncode,model_out)
 print(cm)
+plt.imshow(cm)
+plt.show()
