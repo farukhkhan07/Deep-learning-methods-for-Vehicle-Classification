@@ -44,13 +44,20 @@ for root, _, files in os.walk(bbox):
 							y2 = int(q.rsplit(' ')[3])
 							# print(x1,y1,x2,y2)	
 							try:
+								training_labels.append(int(cipimg.split('\\')[4]))
+								# print(training_labels)
 								read_img = mpg.imread(cipimg)
 								read_img = read_img.astype('float32')
+
 								# print(read_img.shape)
 								read_img_bbox = read_img[y1:y2, x1:x2,:]
+
 								# print(read_img_bbox.shape)
 								resize_img = cv2.cv2.resize(read_img_bbox,(300,300))
-								resize_img_pre = cv2.cv2.normalize(resize_img, None, dtype=cv2.CV_32F)
+								resize_img /= 255.0
+								# plt.imshow(resize_img)
+								# plt.show()
+								# resize_img_pre = cv2.cv2.normalize(resize_img, None, dtype=cv2.CV_32F)
 								# print(int(cipimg.split('\\')[4]))
 								# exit()
 								# resize_img_pre *= 255.0 / resize_img.max()
@@ -62,10 +69,9 @@ for root, _, files in os.walk(bbox):
 								# training_data.append(resize_img)
 								# training_labels.append(int(cipimg.split('\\')[4]))
 
-								training_data.append(resize_img_pre)
-
-								training_labels.append(int(cipimg.split('\\')[4]))
-								gc.collect()
+								training_data.append(resize_img)
+								print("Length Of Training Data",len(training_data))
+								del resize_img
 								# for i in range(37529):
 								# 	if len(training_data) == 10000 and len(training_labels) == 10000:
 								# 		np.save('D:/Inception_preprocessed_data_Labels_2004/Morethan2000samplesData/Training_Data_2000Samples_chunk'+ str(i),training_data)
@@ -80,15 +86,17 @@ for root, _, files in os.walk(bbox):
 								print("Error",str(e), cip)
 							count = count + 1
 							print(count)	
+					gc.collect()		
 					txt.flush()
 					txt.close()	
 
 
 
-try:
-	np.save('D:/Inception_preprocessed_data_Labels_2004/Morethan2000samplesData/Training_Data_2000Samples',training_data)
-	np.save('D:/Inception_preprocessed_data_Labels_2004/Morethan2000samplesData/Training_Labels_2000Samples',training_labels)
-except MemoryError as m:
-	print("Cannot")
+
+# try:
+	np.save('D:/Inception_preprocessed_data_Labels_2004/Morethan4000samplesData/Training_Data_4000Samples',training_data)
+	np.save('D:/Inception_preprocessed_data_Labels_2004/Morethan4000samplesData/Training_Labels_4000Samples',training_labels)
+# except MemoryError as m:
+# 	print("Cannot")
 
 print("DONE")
